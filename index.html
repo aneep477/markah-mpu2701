@@ -15,21 +15,23 @@
         .table-rubric th { background-color: #343a40; color: white; text-align: center; }
         .table-rubric td { vertical-align: middle; }
         .rubric-section-title { background-color: #e9ecef; padding: 10px; border-left: 5px solid #0d6efd; margin-top: 20px; margin-bottom: 10px; font-weight: bold; }
+        
+        /* Animation for fetch loading inside inputs */
+        .input-loading { background-color: #e9ecef; color: #6c757d; }
     </style>
 </head>
 <body>
 
     <div id="loadingOverlay" class="loading-overlay">
         <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
-        <h5 class="mt-3 fw-bold text-dark">Sedang Menyimpan Data...</h5>
-        <p class="text-muted">Sila tunggu sebentar.</p>
+        <h5 class="mt-3 fw-bold text-dark" id="loadingText">Sedang Memproses...</h5>
     </div>
 
     <div class="container mt-4 mb-5">
         <div class="text-center mb-4">
             <h2 class="fw-bold text-primary">Sistem Pemarkahan MPU2701</h2>
             <h5 class="text-secondary">Kokurikulum (Unit Beruniform)</h5>
-            <span class="badge bg-success">Versi Stabil (Data Fix)</span>
+            <span class="badge bg-success">Sistem Dua Hala (Baca & Tulis)</span>
         </div>
 
         <div class="card">
@@ -63,12 +65,12 @@
                     <div class="mb-3">
                         <label class="form-label fw-bold">HP8: Kepimpinan (20%)</label>
                         <input type="number" class="form-control" id="scoreHP8" min="0" max="20" step="0.1">
-                        <div class="form-text">Atribut: KAT3 (Memimpin), A4 (Mengorganisasi). Max: 20.</div>
+                        <div class="form-text">Max: 20.</div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">HP11: Etika & Profesional (10%)</label>
                         <input type="number" class="form-control" id="scoreHP11" min="0" max="10" step="0.1">
-                        <div class="form-text">Atribut: KEP4 (Proaktif). Max: 10.</div>
+                        <div class="form-text">Max: 10.</div>
                     </div>
                 </div>
             </div>
@@ -79,12 +81,12 @@
                     <div class="mb-3">
                         <label class="form-label fw-bold">HP6: Kemahiran Digital (10%)</label>
                         <input type="number" class="form-control" id="scoreHP6" min="0" max="10" step="0.1">
-                        <div class="form-text">Atribut: KMD2. Max: 10.</div>
+                        <div class="form-text">Max: 10.</div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">HP5: Komunikasi (30%)</label>
                         <input type="number" class="form-control" id="scoreHP5" min="0" max="30" step="0.1">
-                        <div class="form-text">Atribut: KMK6, A4. Max: 30.</div>
+                        <div class="form-text">Max: 30.</div>
                     </div>
                 </div>
             </div>
@@ -125,88 +127,15 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    
-                    <div class="rubric-section-title">1. HP8: Kepimpinan, Autonomi & Tanggungjawab (20%)</div>
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-sm table-striped table-rubric" style="font-size: 0.85rem;">
-                            <thead>
-                                <tr>
-                                    <th width="15%">Tahap</th>
-                                    <th width="15%">Markah (Max 20)</th>
-                                    <th>Deskripsi (KAT3 & A4)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr><td>Amat Cemerlang</td><td class="text-center fw-bold">18.0 - 20.0</td><td>Berkeupayaan <strong>sangat tinggi</strong> memimpin projek & menangani cabaran dengan cemerlang.</td></tr>
-                                <tr><td>Cemerlang</td><td class="text-center fw-bold">15.0 - 17.9</td><td>Berkeupayaan memimpin dengan <strong>baik</strong> & memanfaatkan kelebihan ahli pasukan.</td></tr>
-                                <tr><td>Kepujian</td><td class="text-center fw-bold">12.0 - 14.9</td><td>Memimpin dengan baik & dapat menentukan peranan ahli pasukan.</td></tr>
-                                <tr><td>Lulus</td><td class="text-center fw-bold">10.0 - 11.9</td><td>Kurang keupayaan memimpin tetapi ada keinginan.</td></tr>
-                                <tr><td>Lemah</td><td class="text-center fw-bold">< 9.9</td><td>Masih belum berkeyakinan & tidak memahami peranan.</td></tr>
-                            </tbody>
-                        </table>
+                    <div class="rubric-section-title">1. HP8: Kepimpinan (20%)</div>
+                    <table class="table table-bordered table-sm table-striped table-rubric">
+                        <thead><tr><th>Tahap</th><th>Markah (Max 20)</th><th>Deskripsi</th></tr></thead>
+                        <tbody>
+                            <tr><td>Amat Cemerlang</td><td class="text-center fw-bold">18.0 - 20.0</td><td>Berkeupayaan sangat tinggi memimpin.</td></tr>
+                            <tr><td>Cemerlang</td><td class="text-center fw-bold">15.0 - 17.9</td><td>Berkeupayaan memimpin dengan baik.</td></tr>
+                        </tbody>
+                    </table>
                     </div>
-
-                    <div class="rubric-section-title">2. HP11: Etika & Profesional (10%)</div>
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-sm table-striped table-rubric" style="font-size: 0.85rem;">
-                            <thead>
-                                <tr>
-                                    <th width="15%">Tahap</th>
-                                    <th width="15%">Markah (Max 10)</th>
-                                    <th>Deskripsi (KEP4 - Proaktif)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr><td>Amat Cemerlang</td><td class="text-center fw-bold">9.0 - 10.0</td><td>Sentiasa menunjukkan sikap aktif dan positif yang <strong>sangat tinggi</strong> & konsisten.</td></tr>
-                                <tr><td>Cemerlang</td><td class="text-center fw-bold">7.5 - 8.9</td><td>Menunjukkan sikap aktif dan positif yang <strong>tinggi</strong>.</td></tr>
-                                <tr><td>Kepujian</td><td class="text-center fw-bold">6.0 - 7.4</td><td>Ada mempamerkan kepentingan kualiti diri & perubahan bermakna.</td></tr>
-                                <tr><td>Lulus</td><td class="text-center fw-bold">5.0 - 5.9</td><td>Kurang aktif melaksanakan tugasan.</td></tr>
-                                <tr><td>Lemah</td><td class="text-center fw-bold">< 4.9</td><td>Amat kurang aktif & kurang mempamerkan kualiti diri.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="rubric-section-title">3. HP6: Kemahiran Digital (10%)</div>
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-sm table-striped table-rubric" style="font-size: 0.85rem;">
-                            <thead>
-                                <tr>
-                                    <th width="15%">Tahap</th>
-                                    <th width="15%">Markah (Max 10)</th>
-                                    <th>Deskripsi (KMD2)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr><td>Amat Cemerlang</td><td class="text-center fw-bold">9.0 - 10.0</td><td>Sangat berjaya memperoleh & aplikasi pelbagai sumber digital secara optimum.</td></tr>
-                                <tr><td>Cemerlang</td><td class="text-center fw-bold">7.5 - 8.9</td><td>Berjaya aplikasi pelbagai kemahiran digital dengan baik.</td></tr>
-                                <tr><td>Kepujian</td><td class="text-center fw-bold">6.0 - 7.4</td><td>Dapat menggabung beberapa kemahiran digital.</td></tr>
-                                <tr><td>Lulus</td><td class="text-center fw-bold">5.0 - 5.9</td><td>Dapat mengguna kemahiran digital mengikut bidang tugasan.</td></tr>
-                                <tr><td>Lemah</td><td class="text-center fw-bold">< 4.9</td><td>Hanya memperoleh kemahiran digital asas.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                     <div class="rubric-section-title">4. HP5: Kemahiran Komunikasi (30%)</div>
-                     <div class="table-responsive">
-                         <table class="table table-bordered table-sm table-striped table-rubric" style="font-size: 0.85rem;">
-                             <thead>
-                                 <tr>
-                                     <th width="15%">Tahap</th>
-                                     <th width="15%">Markah (Max 30)</th>
-                                     <th>Deskripsi (KMK6 & A4)</th>
-                                 </tr>
-                             </thead>
-                             <tbody>
-                                 <tr><td>Amat Cemerlang</td><td class="text-center fw-bold">27.0 - 30.0</td><td>Bahasa lisan sangat sesuai, mampu mengawal perundingan & idea sangat jelas/yakin.</td></tr>
-                                 <tr><td>Cemerlang</td><td class="text-center fw-bold">22.5 - 26.9</td><td>Bahasa sesuai untuk berunding & idea jelas/yakin.</td></tr>
-                                 <tr><td>Kepujian</td><td class="text-center fw-bold">18.0 - 22.4</td><td>Bahasa sesuai untuk berbincang & idea baik namun perlu pembaikan.</td></tr>
-                                 <tr><td>Lulus</td><td class="text-center fw-bold">15.0 - 17.9</td><td>Bahasa sesuai untuk berbincang tetapi tidak capai persetujuan & idea kurang jelas.</td></tr>
-                                 <tr><td>Lemah</td><td class="text-center fw-bold">< 14.9</td><td>Tidak boleh guna bahasa sesuai & tidak boleh sampaikan idea.</td></tr>
-                             </tbody>
-                         </table>
-                     </div>
-
-                </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                 </div>
@@ -217,7 +146,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // ==========================================================
-        // ⚠️ MASUKKAN URL SCRIPT ANDA DI SINI (YANG TERKINI/WORKING)
+        // ⚠️ MASUKKAN URL WEB APP GOOGLE SCRIPT ANDA DI SINI
         const scriptURL = 'https://script.google.com/macros/s/AKfycbzAyNXnfajmBofkwhLXZQjZQ9jZw5SJf36nEpRKscagqQZoJY8HvPcrDcwkC3gMU3lM/exec';
         // ==========================================================
 
@@ -252,7 +181,9 @@
         function onStudentSelectChange() {
             const id = parseInt(document.getElementById('studentSelect').value);
             const student = students.find(s => s.id === id);
+            
             if (student) {
+                // 1. Papar Info Asas Dulu
                 document.getElementById('infoName').textContent = student.name;
                 document.getElementById('infoIC').textContent = student.ic;
                 document.getElementById('infoClass').textContent = student.kelas;
@@ -260,8 +191,36 @@
                 document.getElementById('rubricForm').style.display = 'block';
                 document.getElementById('resultBox').style.display = 'none';
                 
-                // Kosongkan input
+                // 2. Reset Input
                 ['scoreHP8','scoreHP11','scoreHP6','scoreHP5','scoreExam','notes'].forEach(id => document.getElementById(id).value = '');
+
+                // 3. TARIK DATA DARI GOOGLE SHEET (READ)
+                showLoading("Sedang Menyemak Data Sedia Ada...");
+                
+                const readUrl = scriptURL + "?action=read&id=" + student.id;
+
+                fetch(readUrl)
+                    .then(response => response.json())
+                    .then(response => {
+                        hideLoading();
+                        if (response.result === 'success' && response.data) {
+                            // Jika data jumpa, isi dalam borang
+                            console.log("Data dijumpai:", response.data);
+                            document.getElementById('scoreHP8').value = response.data.hp8;
+                            document.getElementById('scoreHP11').value = response.data.hp11;
+                            document.getElementById('scoreHP6').value = response.data.hp6;
+                            document.getElementById('scoreHP5').value = response.data.hp5;
+                            document.getElementById('scoreExam').value = response.data.ujian;
+                            document.getElementById('notes').value = response.data.notes;
+                        } else {
+                            console.log("Tiada data sedia ada, borang kosong.");
+                        }
+                    })
+                    .catch(error => {
+                        hideLoading();
+                        console.error("Gagal membaca data:", error);
+                        // Tak perlu alert error di sini, biarkan user isi baru
+                    });
             }
         }
 
@@ -270,7 +229,7 @@
             const student = students.find(s => s.id === id);
             
             if (!student) { alert("Pilih pelajar dahulu!"); return; }
-            if (scriptURL.includes("MASUKKAN")) { alert("Sila masukkan URL Script dalam kod HTML anda!"); return; }
+            if (scriptURL.includes("MASUKKAN")) { alert("Sila masukkan URL Script!"); return; }
 
             let hp8 = parseFloat(document.getElementById('scoreHP8').value) || 0;
             let hp11 = parseFloat(document.getElementById('scoreHP11').value) || 0;
@@ -284,7 +243,8 @@
             document.getElementById('displayTotal').textContent = total.toFixed(2);
             document.getElementById('displayGrade').textContent = grade;
             document.getElementById('resultBox').style.display = 'block';
-            document.getElementById('loadingOverlay').style.display = 'flex';
+            
+            showLoading("Sedang Menyimpan Data...");
 
             const formData = new FormData();
             formData.append('id', student.id);
@@ -302,14 +262,23 @@
 
             fetch(scriptURL, { method: 'POST', body: formData })
                 .then(response => {
-                    document.getElementById('loadingOverlay').style.display = 'none';
-                    alert("Data berjaya disimpan! Google Sheet telah dikemaskini.");
+                    hideLoading();
+                    alert("Data berjaya disimpan!");
                 })
                 .catch(error => {
-                    document.getElementById('loadingOverlay').style.display = 'none';
+                    hideLoading();
                     alert("Ralat Sambungan!");
                     console.error('Error!', error.message);
                 });
+        }
+
+        function showLoading(text) {
+            document.getElementById('loadingText').textContent = text;
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+        
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
         }
     </script>
 </body>
