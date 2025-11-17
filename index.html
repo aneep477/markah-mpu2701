@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pemarkahan MPU2701</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .container { max-width: 900px; }
+        .card { box-shadow: 0 4px 8px rgba(0,0,0,0.1); border: none; margin-bottom: 1.5rem; }
+        .card-header { font-weight: bold; }
+        .result-box { background-color: #d1e7dd; border: 1px solid #badbcc; padding: 20px; border-radius: 8px; display: none; margin-top: 20px; }
+        .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
+        .table-rubric th { background-color: #343a40; color: white; text-align: center; }
+        .table-rubric td { vertical-align: middle; }
+        .rubric-section-title { background-color: #e9ecef; padding: 10px; border-left: 5px solid #0d6efd; margin-top: 20px; margin-bottom: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+        <h5 class="mt-3 fw-bold text-dark">Sedang Menyimpan Data...</h5>
+        <p class="text-muted">Sila tunggu sebentar.</p>
+    </div>
+
+    <div class="container mt-4 mb-5">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-primary">Sistem Pemarkahan MPU2701</h2>
+            <h5 class="text-secondary">Kokurikulum (Unit Beruniform)</h5>
+            <span class="badge bg-success">Versi Stabil (Data Fix)</span>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-dark text-white">Pilih Pelajar</div>
+            <div class="card-body">
+                <select class="form-select mb-3" id="studentSelect" onchange="onStudentSelectChange()">
+                    <option value="" selected disabled>-- Sila Pilih Pelajar --</option>
+                </select>
+                
+                <div id="studentInfo" class="alert alert-light border mb-0" style="display:none;">
+                    <div class="row">
+                        <div class="col-md-12"><strong>Nama:</strong> <span id="infoName" class="text-primary fw-bold"></span></div>
+                        <div class="col-md-6 mt-2"><strong>No. KP:</strong> <span id="infoIC"></span></div>
+                        <div class="col-md-6 mt-2"><strong>Kelas:</strong> <span id="infoClass"></span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form id="rubricForm" style="display:none;">
+            
+            <div class="d-flex justify-content-end mb-3">
+                <button type="button" class="btn btn-info text-white fw-bold" data-bs-toggle="modal" data-bs-target="#modalProjek">
+                    📖 Buka Rujukan Rubrik Penuh
+                </button>
+            </div>
+
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">Aktiviti 1: Projek (30%)</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">HP8: Kepimpinan (20%)</label>
+                        <input type="number" class="form-control" id="scoreHP8" min="0" max="20" step="0.1">
+                        <div class="form-text">Atribut: KAT3 (Memimpin), A4 (Mengorganisasi). Max: 20.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">HP11: Etika & Profesional (10%)</label>
+                        <input type="number" class="form-control" id="scoreHP11" min="0" max="10" step="0.1">
+                        <div class="form-text">Atribut: KEP4 (Proaktif). Max: 10.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">Aktiviti 2: Pembentangan (40%)</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">HP6: Kemahiran Digital (10%)</label>
+                        <input type="number" class="form-control" id="scoreHP6" min="0" max="10" step="0.1">
+                        <div class="form-text">Atribut: KMD2. Max: 10.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">HP5: Komunikasi (30%)</label>
+                        <input type="number" class="form-control" id="scoreHP5" min="0" max="30" step="0.1">
+                        <div class="form-text">Atribut: KMK6, A4. Max: 30.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-dark">Ujian (30%)</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Markah Ujian</label>
+                        <input type="number" class="form-control" id="scoreExam" min="0" max="30" step="0.1">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <label class="form-label fw-bold">Catatan</label>
+                    <textarea class="form-control" id="notes" rows="2"></textarea>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2 mb-5">
+                <button type="button" class="btn btn-primary btn-lg" onclick="calculateAndSave()">SIMPAN & KEMASKINI</button>
+            </div>
+
+            <div id="resultBox" class="result-box">
+                <h4 class="alert-heading">Keputusan: <span id="displayGrade" class="fw-bold">-</span></h4>
+                <p class="mb-0">Jumlah: <strong id="displayTotal" style="font-size: 1.3em;">0.00</strong> / 100</p>
+            </div>
+        </form>
+    </div>
+
+    <div class="modal fade" id="modalProjek" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Rujukan Rubrik Penuh MPU2701</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <div class="rubric-section-title">1. HP8: Kepimpinan, Autonomi & Tanggungjawab (20%)</div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm table-striped table-rubric" style="font-size: 0.85rem;">
+                            <thead>
+                                <tr>
+                                    <th width="15%">Tahap</th>
+                                    <th width="15%">Markah (Max 20)</th>
+                                    <th>Deskripsi (KAT3 & A4)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Amat Cemerlang</td><td class="text-center fw-bold">18.0 - 20.0</td><td>Berkeupayaan <strong>sangat tinggi</strong> memimpin projek & menangani cabaran dengan cemerlang.</td></tr>
+                                <tr><td>Cemerlang</td><td class="text-center fw-bold">15.0 - 17.9</td><td>Berkeupayaan memimpin dengan <strong>baik</strong> & memanfaatkan kelebihan ahli pasukan.</td></tr>
+                                <tr><td>Kepujian</td><td class="text-center fw-bold">12.0 - 14.9</td><td>Memimpin dengan baik & dapat menentukan peranan ahli pasukan.</td></tr>
+                                <tr><td>Lulus</td><td class="text-center fw-bold">10.0 - 11.9</td><td>Kurang keupayaan memimpin tetapi ada keinginan.</td></tr>
+                                <tr><td>Lemah</td><td class="text-center fw-bold">< 9.9</td><td>Masih belum berkeyakinan & tidak memahami peranan.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="rubric-section-title">2. HP11: Etika & Profesional (10%)</div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm table-striped table-rubric" style="font-size: 0.85rem;">
+                            <thead>
+                                <tr>
+                                    <th width="15%">Tahap</th>
+                                    <th width="15%">Markah (Max 10)</th>
+                                    <th>Deskripsi (KEP4 - Proaktif)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Amat Cemerlang</td><td class="text-center fw-bold">9.0 - 10.0</td><td>Sentiasa menunjukkan sikap aktif dan positif yang <strong>sangat tinggi</strong> & konsisten.</td></tr>
+                                <tr><td>Cemerlang</td><td class="text-center fw-bold">7.5 - 8.9</td><td>Menunjukkan sikap aktif dan positif yang <strong>tinggi</strong>.</td></tr>
+                                <tr><td>Kepujian</td><td class="text-center fw-bold">6.0 - 7.4</td><td>Ada mempamerkan kepentingan kualiti diri & perubahan bermakna.</td></tr>
+                                <tr><td>Lulus</td><td class="text-center fw-bold">5.0 - 5.9</td><td>Kurang aktif melaksanakan tugasan.</td></tr>
+                                <tr><td>Lemah</td><td class="text-center fw-bold">< 4.9</td><td>Amat kurang aktif & kurang mempamerkan kualiti diri.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="rubric-section-title">3. HP6: Kemahiran Digital (10%)</div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm table-striped table-rubric" style="font-size: 0.85rem;">
+                            <thead>
+                                <tr>
+                                    <th width="15%">Tahap</th>
+                                    <th width="15%">Markah (Max 10)</th>
+                                    <th>Deskripsi (KMD2)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Amat Cemerlang</td><td class="text-center fw-bold">9.0 - 10.0</td><td>Sangat berjaya memperoleh & aplikasi pelbagai sumber digital secara optimum.</td></tr>
+                                <tr><td>Cemerlang</td><td class="text-center fw-bold">7.5 - 8.9</td><td>Berjaya aplikasi pelbagai kemahiran digital dengan baik.</td></tr>
+                                <tr><td>Kepujian</td><td class="text-center fw-bold">6.0 - 7.4</td><td>Dapat menggabung beberapa kemahiran digital.</td></tr>
+                                <tr><td>Lulus</td><td class="text-center fw-bold">5.0 - 5.9</td><td>Dapat mengguna kemahiran digital mengikut bidang tugasan.</td></tr>
+                                <tr><td>Lemah</td><td class="text-center fw-bold">< 4.9</td><td>Hanya memperoleh kemahiran digital asas.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                     <div class="rubric-section-title">4. HP5: Kemahiran Komunikasi (30%)</div>
+                     <div class="table-responsive">
+                         <table class="table table-bordered table-sm table-striped table-rubric" style="font-size: 0.85rem;">
+                             <thead>
+                                 <tr>
+                                     <th width="15%">Tahap</th>
+                                     <th width="15%">Markah (Max 30)</th>
+                                     <th>Deskripsi (KMK6 & A4)</th>
+                                 </tr>
+                             </thead>
+                             <tbody>
+                                 <tr><td>Amat Cemerlang</td><td class="text-center fw-bold">27.0 - 30.0</td><td>Bahasa lisan sangat sesuai, mampu mengawal perundingan & idea sangat jelas/yakin.</td></tr>
+                                 <tr><td>Cemerlang</td><td class="text-center fw-bold">22.5 - 26.9</td><td>Bahasa sesuai untuk berunding & idea jelas/yakin.</td></tr>
+                                 <tr><td>Kepujian</td><td class="text-center fw-bold">18.0 - 22.4</td><td>Bahasa sesuai untuk berbincang & idea baik namun perlu pembaikan.</td></tr>
+                                 <tr><td>Lulus</td><td class="text-center fw-bold">15.0 - 17.9</td><td>Bahasa sesuai untuk berbincang tetapi tidak capai persetujuan & idea kurang jelas.</td></tr>
+                                 <tr><td>Lemah</td><td class="text-center fw-bold">< 14.9</td><td>Tidak boleh guna bahasa sesuai & tidak boleh sampaikan idea.</td></tr>
+                             </tbody>
+                         </table>
+                     </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ==========================================================
+        // ⚠️ MASUKKAN URL SCRIPT ANDA DI SINI (YANG TERKINI/WORKING)
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzAyNXnfajmBofkwhLXZQjZQ9jZw5SJf36nEpRKscagqQZoJY8HvPcrDcwkC3gMU3lM/exec';
+        // ==========================================================
+
+        const students = [
+            { "id": 1, "name": "ABDURAHIM FAIZ BIN MAKHTARUDIN", "ic": "010114-03-0523", "kelas": "PIMK" },
+            { "id": 2, "name": "AHMAD HILMI BIN KAMARULARIPIN", "ic": "990918-10-5427", "kelas": "PIMK" },
+            { "id": 3, "name": "HUMAIRAH BINTI ABDUL RAHMAN", "ic": "950913-14-7410", "kelas": "PIMK" },
+            { "id": 4, "name": "MOHAMAD ZULAMIDI BIN MOHAMED RASID", "ic": "981016-06-5935", "kelas": "PIMK" },
+            { "id": 5, "name": "MUHAMMAD AMIRUL SYAMSURI BIN ZAHID", "ic": "010915-07-0269", "kelas": "PIMK" },
+            { "id": 6, "name": "MUHAMMAD KHAIRUL AMIN BIN ALIAS", "ic": "971004-38-5027", "kelas": "PIMK" },
+            { "id": 7, "name": "MUHAMMAD LUTFI AMIR BIN ABU BAKAR", "ic": "990502-02-5597", "kelas": "PIMK" },
+            { "id": 8, "name": "MUHAMMAD LUTFI BIN AB.LATIF", "ic": "010409-02-0015", "kelas": "PIMK" },
+            { "id": 9, "name": "MUHAMMAD NA'IM BIN AB RAZAK", "ic": "941025-08-5421", "kelas": "PIMK" },
+            { "id": 10, "name": "NUR FARHANAH BINTI MOHAMAD", "ic": "000207-11-0080", "kelas": "PIMK" },
+            { "id": 11, "name": "NUR FATIHAH BINTI ADAM", "ic": "001226-08-0678", "kelas": "PIMK" },
+            { "id": 12, "name": "NURUL HASANAH BINTI CHE MAD SAH", "ic": "000223-06-0116", "kelas": "PIMK" },
+            { "id": 13, "name": "RIZALMAN BIN ROZI", "ic": "990708-03-5459", "kelas": "PIMK" },
+            { "id": 14, "name": "SHAFIKAH ZAKIAH BINTI MUHAMAD", "ic": "970706-01-6176", "kelas": "PIMK" },
+            { "id": 15, "name": "SITI KHALIMAHTUS SAADIAH BINTI MOHD TAYIB", "ic": "970706-38-5094", "kelas": "PIMK" }
+        ];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const select = document.getElementById('studentSelect');
+            students.forEach(s => {
+                const option = document.createElement('option');
+                option.value = s.id; 
+                option.textContent = s.name; 
+                select.appendChild(option);
+            });
+        });
+
+        function onStudentSelectChange() {
+            const id = parseInt(document.getElementById('studentSelect').value);
+            const student = students.find(s => s.id === id);
+            if (student) {
+                document.getElementById('infoName').textContent = student.name;
+                document.getElementById('infoIC').textContent = student.ic;
+                document.getElementById('infoClass').textContent = student.kelas;
+                document.getElementById('studentInfo').style.display = 'block';
+                document.getElementById('rubricForm').style.display = 'block';
+                document.getElementById('resultBox').style.display = 'none';
+                
+                // Kosongkan input
+                ['scoreHP8','scoreHP11','scoreHP6','scoreHP5','scoreExam','notes'].forEach(id => document.getElementById(id).value = '');
+            }
+        }
+
+        function calculateAndSave() {
+            const id = parseInt(document.getElementById('studentSelect').value);
+            const student = students.find(s => s.id === id);
+            
+            if (!student) { alert("Pilih pelajar dahulu!"); return; }
+            if (scriptURL.includes("MASUKKAN")) { alert("Sila masukkan URL Script dalam kod HTML anda!"); return; }
+
+            let hp8 = parseFloat(document.getElementById('scoreHP8').value) || 0;
+            let hp11 = parseFloat(document.getElementById('scoreHP11').value) || 0;
+            let hp6 = parseFloat(document.getElementById('scoreHP6').value) || 0;
+            let hp5 = parseFloat(document.getElementById('scoreHP5').value) || 0;
+            let exam = parseFloat(document.getElementById('scoreExam').value) || 0;
+
+            const total = hp8 + hp11 + hp6 + hp5 + exam;
+            let grade = total >= 80 ? 'A' : total >= 75 ? 'A-' : total >= 70 ? 'B+' : total >= 65 ? 'B' : total >= 60 ? 'B-' : total >= 55 ? 'C+' : total >= 50 ? 'C' : 'F';
+
+            document.getElementById('displayTotal').textContent = total.toFixed(2);
+            document.getElementById('displayGrade').textContent = grade;
+            document.getElementById('resultBox').style.display = 'block';
+            document.getElementById('loadingOverlay').style.display = 'flex';
+
+            const formData = new FormData();
+            formData.append('id', student.id);
+            formData.append('name', student.name);
+            formData.append('ic', student.ic);
+            formData.append('kelas', student.kelas);
+            formData.append('hp8', hp8);
+            formData.append('hp11', hp11);
+            formData.append('hp6', hp6);
+            formData.append('hp5', hp5);
+            formData.append('ujian', exam);
+            formData.append('total', total.toFixed(2));
+            formData.append('grade', grade);
+            formData.append('notes', document.getElementById('notes').value);
+
+            fetch(scriptURL, { method: 'POST', body: formData })
+                .then(response => {
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    alert("Data berjaya disimpan! Google Sheet telah dikemaskini.");
+                })
+                .catch(error => {
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    alert("Ralat Sambungan!");
+                    console.error('Error!', error.message);
+                });
+        }
+    </script>
+</body>
+</html>
